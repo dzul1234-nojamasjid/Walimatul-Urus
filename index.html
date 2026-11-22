@@ -664,10 +664,11 @@
       
       window.speechSynthesis.cancel();
       
+      // Updated text to include the full greetings and formal request
       const steps = [
         { 
           id: 'para-a1', 
-          text: "Mohammed Fadzil bin Kadir together with Latifah binte Mohamed request the honour of your presence at the wedding of their daughter, Batrisyia binte Mohammed Fadzil, and Mohammed Nabil Nur Ariff bin Mohammed Hafeez." 
+          text: "May peace be upon you. Salam Sejahtera. Mohammed Fadzil bin Kadir, together with Latifah binte Mohamed, request the honour of your presence at the wedding of their daughter, Batrisyia binte Mohammed Fadzil, and Mohammed Nabil Nur Ariff bin Mohammed Hafeez. Your presence will be greatly appreciated. Kehadiran anda amat dihargai." 
         },
         { id: 'para-date', text: "Sunday, 27 December 2026." },
         { id: 'para-time', text: "From 11 AM to 3 PM." },
@@ -695,6 +696,13 @@
         const utterance = new SpeechSynthesisUtterance(step.text);
         utterance.rate = 0.9;
         
+        // If reading the Malay words, try to find a Malay/Indonesian voice if available
+        if (step.id === 'para-a1' && step.text.includes('Salam Sejahtera')) {
+           const voices = window.speechSynthesis.getVoices();
+           const msVoice = voices.find(v => v.lang.includes('ms') || v.lang.includes('id'));
+           if (msVoice) utterance.voice = msVoice;
+        }
+
         utterance.onend = () => {
           if (el) el.classList.remove('reading-active');
           currentIndex++;
