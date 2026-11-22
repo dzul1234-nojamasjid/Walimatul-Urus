@@ -10,6 +10,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
 
+  <!-- Supabase Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     /* Default is Dark Mode */
     :root {
@@ -556,8 +559,17 @@
       <div class="section-title">Share & Wishes</div>
       <button class="btn btn-outline" onclick="showQr()" style="margin-bottom: 20px;">📱 Share / Show QR Code</button>
       
-      <!-- Formspree Form (Will be replaced with DB later) -->
-      <form id="wishForm">
+      <!-- Supabase Live Wishes Wall -->
+      <div style="margin-top: 20px; border-top: 1px dashed var(--border-col); padding-top: 15px;">
+        <div class="section-title" style="border: none; margin-bottom: 10px; font-size: 14px;">Recent Wishes</div>
+        <div id="wishesWall" style="height: 120px; overflow-y: auto; position: relative; font-size: 12px; line-height: 1.6; text-align: left; padding-right: 5px;">
+          <!-- Wishes will appear here -->
+          <div style="text-align: center; opacity: 0.5;">Loading wishes...</div>
+        </div>
+      </div>
+
+      <!-- Wish Form -->
+      <form id="wishForm" style="margin-top: 20px;">
         <input type="text" id="wishName" name="name" class="input-field" placeholder="Your Name" required />
         <textarea id="wishText" name="wish" class="input-field" placeholder="Leave a wish or doa for the couple..." required></textarea>
         <button type="submit" id="submitWishBtn" class="btn btn-primary">Send Wish</button>
@@ -785,36 +797,88 @@
       document.getElementById('qrModal').style.display = 'none';
     }
 
-    // --- 9. Formspree Wishes Form ---
+    // --- 9. Supabase Live Wishes ---
+    const SUPABASE_URL = 'https://nlkjbblgtscazpvixfzz.supabase.co'; // Replace this
+    const SUPABASE_ANON_KEY = 'sb_publishable_wO4lYkspm-68OVSNBlKSjw_8QP2UN-D'; // Replace this
+
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     const form = document.getElementById('wishForm');
     const submitBtn = document.getElementById('submitWishBtn');
+    const wishesWall = document.getElementById('wishesWall');
 
-    form.addEventListener('submit', function(e) {
-      e.preventDefault(); 
-      const endpoint = "https://formspree.io/f/mnpdoaag"; 
+    // Function to fetch and display wishes
+    async function fetchWishes() {
+      const { data, error } = await supabaseClient
+        .from('wishes')
+        .select('name, message')
+        .order('created_at', { ascending: false })
+        .limit(10); // Get the latest 10
+
+      if (error) {
+        console.error('Error fetching wishes:', error);
+        wishesWall.innerHTML = '<div style="text-align: center; color: red;">Failed to load wishes.</div>';
+        return;
+      }
+
+      if (data.length === 0) {
+        wishesWall.innerHTML = '<div style="text-align: center; opacity: 0.5;">No wishes yet. Be the first!</div>';
+        return;
+      }
+
+      // Build the HTML
+      wishesWall.innerHTML = data.map(w => `
+        <div style="margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+          <strong style="color: var(--text-accent);">${w.name}:</strong> ${w.message}
+        </div>
+      `).join('');
+
+      // Simple auto-scroll effect to show the newest at the bottom
+      wishesWall.scrollTop = wishesWall.scrollHeight;
+    }
+
+    // Initial load
+    fetchWishes();
+
+    // Real-time subscription: listen for new wishes
+    supabaseClient
+      .channel('public:wishes')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'wishes' }, payload => {
+        // When a new wish is added, fetch the updated list
+        fetchWishes();
+      })
+      .subscribe();
+
+    // Handle form submission
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById('wishName').value.trim();
+      const message = document.getElementById('wishText').value.trim();
+
+      if (!name || !message) {
+        alert("Please fill in both your name and wish.");
+        return;
+      }
 
       submitBtn.disabled = true;
       submitBtn.innerText = "Sending...";
 
-      const formData = new FormData(form);
+      const { error } = await supabaseClient
+        .from('wishes')
+        .insert([{ name: name, message: message }]);
 
-      fetch(endpoint, {
-        method: 'POST',
-        body: formData,
-        headers: { 'Accept': 'application/json' }
-      }).then(response => {
-        if (response.ok) {
-          alert("Thank you! Your wish has been sent to the couple.");
-          form.reset();
-        } else {
-          alert("Oops! There was a problem sending your wish. Please try again.");
-        }
-      }).catch(error => {
-        alert("Network error. Please check your connection and try again.");
-      }).finally(() => {
-        submitBtn.disabled = false;
-        submitBtn.innerText = "Send Wish";
-      });
+      if (error) {
+        alert("Oops! There was a problem sending your wish. Please try again.");
+        console.error(error);
+      } else {
+        alert("Thank you! Your wish has been added.");
+        form.reset();
+        // The real-time listener will automatically update the wall
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.innerText = "Send Wish";
     });
 
     // --- 10. Flying Leaves Animation ---
