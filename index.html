@@ -664,11 +664,16 @@
       
       window.speechSynthesis.cancel();
       
-      // Updated text to include the full greetings and formal request
+      // Updated text to separate English and Malay for better pronunciation
       const steps = [
         { 
           id: 'para-a1', 
-          text: "May peace be upon you. Salam Sejahtera. Mohammed Fadzil bin Kadir, together with Latifah binte Mohamed, request the honour of your presence at the wedding of their daughter, Batrisyia binte Mohammed Fadzil, and Mohammed Nabil Nur Ariff bin Mohammed Hafeez. Your presence will be greatly appreciated. Kehadiran anda amat dihargai." 
+          text: "May peace be upon you. Mohammed Fadzil bin Kadir, together with Latifah binte Mohamed, request the honour of your presence at the wedding of their daughter, Batrisyia binte Mohammed Fadzil, and Mohammed Nabil Nur Ariff bin Mohammed Hafeez." 
+        },
+        {
+          id: 'para-a1',
+          text: "Salam Sejahtera. Dengan segala hormatnya mengundang anda ke majlis perkahwinan puteri kami. Kehadiran anda amat dihargai.",
+          lang: 'ms' // Force Malay pronunciation for this part
         },
         { id: 'para-date', text: "Sunday, 27 December 2026." },
         { id: 'para-time', text: "From 11 AM to 3 PM." },
@@ -688,7 +693,8 @@
         const step = steps[currentIndex];
         const el = document.getElementById(step.id);
         
-        if (el) {
+        // Keep highlight on if it's the same ID consecutively
+        if (el && !el.classList.contains('reading-active')) {
           el.classList.add('reading-active');
           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
@@ -696,16 +702,25 @@
         const utterance = new SpeechSynthesisUtterance(step.text);
         utterance.rate = 0.9;
         
-        // If reading the Malay words, try to find a Malay/Indonesian voice if available
-        if (step.id === 'para-a1' && step.text.includes('Salam Sejahtera')) {
+        // If step has a specific language, use it to prevent weird accents
+        if (step.lang) {
+           utterance.lang = step.lang === 'ms' ? 'ms-MY' : 'en-US';
            const voices = window.speechSynthesis.getVoices();
-           const msVoice = voices.find(v => v.lang.includes('ms') || v.lang.includes('id'));
-           if (msVoice) utterance.voice = msVoice;
+           const matchedVoice = voices.find(v => v.lang.includes(step.lang));
+           if (matchedVoice) utterance.voice = matchedVoice;
         }
 
         utterance.onend = () => {
-          if (el) el.classList.remove('reading-active');
           currentIndex++;
+          // Only remove highlight if the NEXT step is a different element
+          if (currentIndex < steps.length && steps[currentIndex].id !== step.id) {
+             if (el) el.classList.remove('reading-active');
+          }
+          // If it's the last step, clean up
+          if (currentIndex >= steps.length && el) {
+             el.classList.remove('reading-active');
+          }
+          
           speakNext();
         };
 
