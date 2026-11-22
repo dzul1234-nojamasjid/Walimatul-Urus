@@ -556,6 +556,7 @@
       <div class="section-title">Share & Wishes</div>
       <button class="btn btn-outline" onclick="showQr()" style="margin-bottom: 20px;">📱 Share / Show QR Code</button>
       
+      <!-- Formspree Form (Will be replaced with DB later) -->
       <form id="wishForm">
         <input type="text" id="wishName" name="name" class="input-field" placeholder="Your Name" required />
         <textarea id="wishText" name="wish" class="input-field" placeholder="Leave a wish or doa for the couple..." required></textarea>
@@ -579,61 +580,13 @@
     </div>
   </div>
 
+  <!-- Background Music Audio Tag -->
+  <audio id="bgMusic" src="https://raw.githubusercontent.com/dzul1234-nojamasjid/Walimatul-Urus/main/piano.mp3" loop preload="auto"></audio>
+
   <script>
-    // --- 1. Audio Engine (Web Audio API for Background Music) ---
-    let audioCtx;
-    let isPlaying = false;
-    let melodyInterval;
-
-    function initAudio() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-    }
-
-    const progression = [
-      [293.66, 349.23, 440.00], 
-      [220.00, 261.63, 329.63], 
-      [174.61, 220.00, 261.63], 
-      [196.00, 246.94, 293.66], 
-    ];
-    let chordIndex = 0;
-
-    function playNote(freq, startTime, duration, vol=0.05) {
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0, startTime);
-      gain.gain.linearRampToValueAtTime(vol, startTime + 1.5);
-      gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start(startTime);
-      osc.stop(startTime + duration);
-    }
-
-    function playMelody() {
-      if (!audioCtx) return;
-      const now = audioCtx.currentTime;
-      const chord = progression[chordIndex];
-      playNote(chord[0], now, 4.5, 0.08);
-      playNote(chord[1], now + 0.3, 4.5, 0.06);
-      playNote(chord[2], now + 0.6, 4.5, 0.05);
-      playNote(chord[1] * 2, now + 1.5, 3.0, 0.03);
-      chordIndex = (chordIndex + 1) % progression.length;
-    }
-
-    function startMusic() {
-      if (isPlaying) return;
-      initAudio();
-      isPlaying = true;
-      playMelody();
-      melodyInterval = setInterval(playMelody, 4000);
-    }
+    // --- 1. Audio Elements ---
+    const bgMusic = document.getElementById('bgMusic');
+    const doaAudio = document.getElementById('doaAudio');
 
     // --- 2. Envelope Open Logic ---
     function openInvitation() {
@@ -648,9 +601,14 @@
         main.style.display = 'block';
         setTimeout(() => { main.style.opacity = '1'; }, 50);
         
-        startMusic();
-        setTimeout(autoReadWithScroll, 1500); 
+        // Play Piano Music
+        bgMusic.volume = 0.5; // Set volume to 50%
+        bgMusic.play().catch(e => console.log("Audio play blocked. Interaction needed."));
         
+        // Start Auto Read
+        setTimeout(autoReadWithScroll, 2000); 
+        
+        // Auto Flip Card
         setInterval(() => {
           document.getElementById('card3d').classList.toggle('flipped');
         }, 6000);
@@ -658,10 +616,9 @@
       }, 800);
     }
 
-    // --- 3. Advanced Text-to-Speech (Highlighting A1 image and scrolling) ---
+    // --- 3. Advanced Text-to-Speech ---
     function autoReadWithScroll() {
       if (!('speechSynthesis' in window)) return;
-      
       window.speechSynthesis.cancel();
       
       const steps = [
@@ -674,7 +631,7 @@
           text: "Salam Sejahtera. Dengan segala hormatnya mengundang anda ke majlis perkahwinan puteri kami. Kehadiran anda amat dihargai.",
           lang: 'ms' 
         },
-        { id: 'para-date', text: "Ahad, 27 Disember 2026.", lang: 'ms' }, // Changed to Malay!
+        { id: 'para-date', text: "Ahad, 27 Disember 2026.", lang: 'ms' },
         { id: 'para-time', text: "From 11 AM to 3 PM.", lang: 'en' },
         { id: 'para-venue', text: "Crowne Plaza Changi Airport.", lang: 'en' },
         { id: 'para-address', text: "Chengal Ballroom Level 1, 75 Airport Boulevard Singapore.", lang: 'en' }
@@ -723,26 +680,44 @@
       speakNext();
     }
 
-    // --- 4. Play Doa MP3 ---
+    // --- 4. Play Doa MP3 (Fade out piano, play doa, fade back in) ---
     function playDoaAudio() {
-      if (isPlaying) {
-        clearInterval(melodyInterval);
-        isPlaying = false;
-      }
-      
+      // Fade out background piano
+      let fadeOut = setInterval(() => {
+        if (bgMusic.volume > 0.05) {
+          bgMusic.volume -= 0.05;
+        } else {
+          clearInterval(fadeOut);
+          bgMusic.pause();
+        }
+      }, 100);
+
       const audio = document.getElementById('doaAudio');
       
       document.getElementById('doa-section').scrollIntoView({ behavior: 'smooth', block: 'center' });
       document.getElementById('doa-section').classList.add('reading-active');
       
-      audio.play().catch(e => console.log("Audio play blocked by browser. User must click."));
+      setTimeout(() => {
+        audio.play().catch(e => console.log("Doa audio play blocked."));
+      }, 500); // Wait for piano to fade slightly
       
       audio.onended = () => {
         document.getElementById('doa-section').classList.remove('reading-active');
+        // Fade piano back in
+        bgMusic.volume = 0;
+        bgMusic.play();
+        let fadeIn = setInterval(() => {
+          if (bgMusic.volume < 0.45) {
+            bgMusic.volume += 0.05;
+          } else {
+            bgMusic.volume = 0.5;
+            clearInterval(fadeIn);
+          }
+        }, 100);
       };
     }
 
-    // --- 5. 3D Card Flip (Manual) ---
+    // --- 5. 3D Card Flip ---
     function flipCard() {
       document.getElementById('card3d').classList.toggle('flipped');
     }
