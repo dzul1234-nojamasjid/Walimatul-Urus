@@ -8,70 +8,42 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
 
   <style>
+    /* Default is Dark Mode */
     :root {
-      /* Theme 1: Rose Gold & Cream (Light Mode) */
-      --bg-color: #faf7f2;
-      --card-bg: #ffffff;
-      --text-main: #4a3b32;
-      --text-accent: #8b3a3a; /* Burgundy/Deep Rose */
+      --bg-color: #121212;
+      --card-bg: #1a1a1a;
+      --text-main: #e0e0e0;
+      --text-accent: #d4af37; 
+      --gold: #d4af37;
+      --shadow: rgba(212, 175, 55, 0.15);
+      --border-col: rgba(212, 175, 55, 0.4);
+      --box-bg: rgba(26, 26, 26, 0.85);
+      --btn-bg: #d4af37;
+      --btn-text: #121212;
+      --countdown-bg: #000000;
+      --countdown-text: #39ff14; /* Neon Green */
+    }
+
+    /* Dim Light Mode */
+    [data-theme="light"] {
+      --bg-color: #e8e4db; /* Softer than pure white */
+      --card-bg: #f5f2ea;
+      --text-main: #333333;
+      --text-accent: #8b3a3a; 
       --gold: #c5a059;
       --shadow: rgba(139, 58, 58, 0.15);
       --border-col: rgba(197, 160, 89, 0.4);
-      --box-bg: rgba(255, 255, 255, 0.88);
+      --box-bg: rgba(245, 242, 234, 0.9);
       --btn-bg: #8b3a3a;
       --btn-text: #ffffff;
-
-      /* Countdown Light Mode */
-      --cd-bg: #8b3a3a;
-      --cd-title: #ffffff;
-      --cd-num-bg: rgba(0, 0, 0, 0.18);
-      --cd-num-color: #ffffff;
-      --cd-ms-color: #ffffff;
-
-      /* WhatsApp Buttons Light Mode */
-      --wa-primary-bg: #25D366;
-      --wa-primary-text: #000000;
-      --wa-sec-bg: #ffffff;
-      --wa-sec-text: #000000;
-      --wa-sec-border: #25D366;
-    }
-
-    [data-theme="dark"] {
-      /* Theme 2: Midnight & Gold (Default Dark Mode) */
-      --bg-color: #121212;
-      --card-bg: #1a1a1a;
-      --text-main: #e6e6e6;
-      --text-accent: #d4af37; /* Gold */
-      --gold: #d4af37;
-      --shadow: rgba(212, 175, 55, 0.12);
-      --border-col: rgba(212, 175, 55, 0.4);
-      --box-bg: rgba(26, 26, 26, 0.9);
-      --btn-bg: #d4af37;
-      --btn-text: #121212;
-
-      /* Countdown Dark Mode: Black bg + Light Green fonts */
-      --cd-bg: #000000;
-      --cd-title: #86efac;
-      --cd-num-bg: #141414;
-      --cd-num-color: #4ade80;
-      --cd-ms-color: #4ade80;
-
-      /* WhatsApp Buttons Dark Mode */
-      --wa-primary-bg: #25D366;
-      --wa-primary-text: #000000;
-      --wa-sec-bg: rgba(37, 211, 102, 0.12);
-      --wa-sec-text: #4ade80;
-      --wa-sec-border: #25D366;
+      --countdown-bg: #8b3a3a;
+      --countdown-text: #ffffff;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-    html {
-      scroll-behavior: smooth;
-    }
 
     body {
       background-color: var(--bg-color);
@@ -85,22 +57,6 @@
       align-items: center;
     }
 
-    /* Dim Mode Overlay */
-    #dimOverlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.45);
-      pointer-events: none;
-      z-index: 9999;
-      opacity: 0;
-      transition: opacity 0.4s ease;
-    }
-
-    body.dimmed #dimOverlay {
-      opacity: 1;
-    }
-
-    /* Flying Leaves Canvas */
     #leafCanvas {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -108,17 +64,9 @@
       z-index: 0;
     }
 
-    /* Top Controls (Theme & Dim Mode) */
-    .top-controls {
+    .theme-toggle {
       position: fixed;
-      top: 15px;
-      right: 15px;
-      display: flex;
-      gap: 8px;
-      z-index: 100;
-    }
-
-    .control-btn {
+      top: 15px; right: 15px;
       background: var(--card-bg);
       border: 1px solid var(--border-col);
       color: var(--text-accent);
@@ -126,24 +74,14 @@
       border-radius: 20px;
       font-size: 12px;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
       font-weight: 600;
-      transition: transform 0.2s, background-color 0.3s;
     }
 
-    .control-btn:active {
-      transform: scale(0.95);
-    }
-
-    .control-btn.active-dim {
-      background: var(--text-accent);
-      color: var(--btn-text);
-    }
-
-    /* Envelope Overlay */
     .env-overlay {
       position: fixed;
       inset: 0;
@@ -178,22 +116,22 @@
       top: 0; left: 0;
       border-left: 140px solid transparent;
       border-right: 140px solid transparent;
-      border-top: 100px solid rgba(197, 160, 89, 0.12);
+      border-top: 100px solid rgba(197, 160, 89, 0.1);
     }
 
     .wax-seal {
-      width: 54px;
-      height: 54px;
+      width: 50px;
+      height: 50px;
       background: var(--text-accent);
       border-radius: 50%;
-      color: var(--btn-text);
+      color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: 'Great Vibes', cursive;
       font-size: 24px;
       z-index: 2;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
       transition: transform 0.3s;
     }
     
@@ -215,30 +153,28 @@
       50% { transform: translateY(-10px); }
     }
 
-    /* Main Content */
     .main-content {
       position: relative;
       z-index: 10;
       width: 100%;
       max-width: 480px;
-      padding: 60px 15px 60px;
+      padding: 20px 15px 60px;
       display: none;
       opacity: 0;
       transition: opacity 1s ease;
     }
 
-    /* 3D Card Container */
     .scene {
       width: 100%;
       height: 550px;
       perspective: 1000px;
-      margin-bottom: 12px;
+      margin-bottom: 30px;
       animation: floatCard 4s ease-in-out infinite;
     }
 
     @keyframes floatCard {
       0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-12px); }
+      50% { transform: translateY(-15px); }
     }
 
     .card-3d {
@@ -277,7 +213,6 @@
       transform: rotateY(180deg);
     }
 
-    /* Info Boxes */
     .info-box {
       background: var(--box-bg);
       backdrop-filter: blur(10px);
@@ -287,13 +222,6 @@
       text-align: center;
       margin-bottom: 20px;
       box-shadow: 0 8px 25px var(--shadow);
-      transition: border-color 0.4s ease, box-shadow 0.4s ease;
-    }
-
-    /* Active Reading Highlight */
-    .info-box.reading-active {
-      border-color: var(--text-accent);
-      box-shadow: 0 0 20px var(--shadow);
     }
 
     .names {
@@ -301,7 +229,7 @@
       font-size: 42px;
       color: var(--text-accent);
       line-height: 1.1;
-      margin-bottom: 8px;
+      margin-bottom: 5px;
     }
 
     .date-text {
@@ -331,22 +259,19 @@
     .venue-address {
       font-size: 12px;
       color: var(--text-main);
-      opacity: 0.85;
+      opacity: 0.8;
       margin-bottom: 15px;
-      line-height: 1.5;
     }
 
-    /* Countdown */
     .countdown-box {
-      background: var(--cd-bg);
-      color: var(--cd-title);
-      border: 1px solid var(--border-col);
+      background: var(--countdown-bg);
+      color: var(--countdown-text);
       border-radius: 16px;
-      padding: 16px 10px;
+      padding: 15px 10px;
       margin-bottom: 20px;
       text-align: center;
       box-shadow: 0 8px 20px var(--shadow);
-      transition: background-color 0.4s ease;
+      border: 1px solid var(--border-col);
     }
 
     .countdown-title {
@@ -354,7 +279,7 @@
       text-transform: uppercase;
       letter-spacing: 2px;
       margin-bottom: 10px;
-      font-weight: 600;
+      opacity: 0.9;
     }
 
     .countdown-timer {
@@ -373,29 +298,24 @@
     .time-num {
       font-size: 22px;
       font-weight: 600;
-      background: var(--cd-num-bg);
-      color: var(--cd-num-color);
+      background: rgba(0,0,0,0.2);
       padding: 4px 10px;
       border-radius: 6px;
       min-width: 45px;
-      border: 1px solid rgba(255,255,255,0.08);
     }
 
     .time-num.ms {
       min-width: 55px;
       font-size: 18px;
-      color: var(--cd-ms-color);
     }
 
     .time-label {
       font-size: 9px;
       text-transform: uppercase;
       margin-top: 4px;
-      opacity: 0.9;
-      font-family: 'Montserrat', sans-serif;
+      opacity: 0.8;
     }
 
-    /* Buttons */
     .btn {
       display: flex;
       align-items: center;
@@ -405,15 +325,16 @@
       padding: 14px;
       border-radius: 10px;
       font-size: 14px;
-      font-weight: 700;
+      font-weight: 600;
       text-decoration: none;
-      transition: transform 0.2s, opacity 0.2s, background-color 0.3s;
+      transition: transform 0.2s, opacity 0.2s;
       border: none;
       cursor: pointer;
       margin-bottom: 10px;
     }
 
     .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
     
     .btn-primary {
       background: var(--btn-bg);
@@ -426,19 +347,19 @@
       border: 1px solid var(--text-accent);
     }
     
-    /* WhatsApp Buttons */
-    .btn-wa {
-      background: var(--wa-primary-bg);
-      color: var(--wa-primary-text);
+    /* RSVP Buttons */
+    .btn-wa-attending {
+      background: #25D366; /* WhatsApp Green */
+      color: #000000; /* Black text for contrast */
+      font-weight: 700;
     }
 
-    .btn-wa-secondary {
-      background: var(--wa-sec-bg);
-      color: var(--wa-sec-text);
-      border: 2px solid var(--wa-sec-border);
+    .btn-wa-decline {
+      background: #ffffff; /* White bg */
+      color: #000000; /* Black text */
+      border: 1px solid #25D366;
     }
 
-    /* Doa Section */
     .doa-arabic {
       font-size: 22px;
       color: var(--text-accent);
@@ -458,15 +379,36 @@
     .doa-meaning {
       font-size: 12px;
       color: var(--text-main);
-      opacity: 0.85;
+      opacity: 0.8;
       line-height: 1.5;
     }
 
-    /* Modal for QR */
+    .input-field {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-col);
+      background: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Montserrat', sans-serif;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+
+    .input-field:focus {
+      outline: none;
+      border-color: var(--text-accent);
+    }
+
+    textarea.input-field {
+      resize: vertical;
+      min-height: 80px;
+    }
+
     .modal {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.85);
+      background: rgba(0,0,0,0.8);
       display: none;
       align-items: center;
       justify-content: center;
@@ -482,7 +424,7 @@
       text-align: center;
       max-width: 320px;
       width: 100%;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
       border: 1px solid var(--border-col);
     }
     
@@ -493,28 +435,13 @@
       border-radius: 8px;
       padding: 10px;
       background: white;
-      display: block;
     }
     
     .close-modal {
-      margin-top: 8px;
+      margin-top: 15px;
       background: transparent;
       border: 1px solid var(--text-main);
       color: var(--text-main);
-    }
-
-    /* Wishes Form */
-    .wish-input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid var(--border-col);
-      background: var(--bg-color);
-      color: var(--text-main);
-      font-family: 'Montserrat', sans-serif;
-      margin-bottom: 10px;
-      resize: vertical;
-      min-height: 80px;
     }
 
     .section-title {
@@ -526,28 +453,23 @@
       border-bottom: 1px solid var(--border-col);
       padding-bottom: 8px;
     }
+
+    /* Reading Highlight Effect */
+    .reading-active {
+      background-color: rgba(212, 175, 55, 0.2);
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
   </style>
 </head>
-<!-- Default to DARK mode -->
-<body data-theme="dark">
+<body>
 
-  <!-- Dim Mode Overlay -->
-  <div id="dimOverlay"></div>
-
-  <!-- Flying Leaves Canvas -->
   <canvas id="leafCanvas"></canvas>
 
-  <!-- Top Controls -->
-  <div class="top-controls">
-    <button class="control-btn" id="dimBtn" onclick="toggleDim()">
-      <span>🔅</span> <span id="dimText">Dim</span>
-    </button>
-    <button class="control-btn" onclick="toggleTheme()">
-      <span id="themeIcon">☀️</span> <span id="themeText">Light Mode</span>
-    </button>
-  </div>
+  <button class="theme-toggle" onclick="toggleTheme()">
+    <span id="themeIcon">☀️</span> <span id="themeText">Dim Light</span>
+  </button>
 
-  <!-- Envelope Overlay -->
   <div class="env-overlay" id="envOverlay">
     <div class="envelope" onclick="openInvitation()">
       <div class="wax-seal">B & N</div>
@@ -555,11 +477,9 @@
     </div>
   </div>
 
-  <!-- Main Content -->
   <div class="main-content" id="mainContent">
     
-    <!-- 3D Card -->
-    <div class="scene" onclick="manualFlipCard()">
+    <div class="scene" onclick="flipCard()">
       <div class="card-3d" id="card3d">
         <div class="card-face card-front">
           <img src="https://raw.githubusercontent.com/dzul1234-nojamasjid/Walimatul-Urus/main/Front_0001.jpg" alt="Front Card" />
@@ -569,9 +489,7 @@
         </div>
       </div>
     </div>
-    <p style="text-align: center; font-size: 11px; margin-bottom: 20px; opacity: 0.7;">Auto-flipping card • Tap to flip manually</p>
 
-    <!-- Countdown -->
     <div class="countdown-box">
       <div class="countdown-title">Counting down to the big day</div>
       <div class="countdown-timer" id="timer">
@@ -583,56 +501,60 @@
       </div>
     </div>
 
-    <!-- Event Details -->
-    <div class="info-box" id="detailsSection">
+    <div class="info-box">
       <div class="names">Batrisyia & Nabil</div>
-      <p style="font-size: 13px; margin-bottom: 20px; line-height: 1.6; opacity: 0.9;">
+      <p id="para1" style="font-size: 13px; margin-bottom: 20px; line-height: 1.6; opacity: 0.9;">
         Together with their families, we cordially invite you to celebrate our wedding day. Your presence will be greatly appreciated.
       </p>
 
-      <div class="date-text">Sunday, 27 December 2026</div>
-      <div class="time-text">11:00 AM - 3:00 PM</div>
+      <div class="date-text" id="para2">Sunday, 27 December 2026</div>
+      <div class="time-text" id="para3">11:00 AM - 3:00 PM</div>
       
-      <div class="venue-name">Crowne Plaza Changi Airport</div>
-      <div class="venue-address">Chengal Ballroom Level 1<br>75 Airport Boulevard Singapore 819664<br>Changi Airport Terminal 3, Carpark 3B</div>
+      <div class="venue-name" id="para4">Crowne Plaza Changi Airport</div>
+      <div class="venue-address" id="para5">Chengal Ballroom Level 1<br>75 Airport Boulevard Singapore 819664<br>Changi Airport Terminal 3, Carpark 3B</div>
 
       <a href="https://maps.google.com/?q=Crowne+Plaza+Changi+Airport+Singapore" target="_blank" class="btn btn-primary">
         📍 Open Google Maps
       </a>
     </div>
 
-    <!-- Doa -->
-    <div class="info-box" id="doaSection">
+    <div class="info-box">
       <div class="section-title">Doa for the Couple</div>
       <div class="doa-arabic">بَارَكَ اللَّهُ لَكَ وَبَارَكَ عَلَيْكَ وَجَمَعَ بَيْنَكُمَا فِي خَيْرٍ</div>
       <div class="doa-transliteration">Bārakallāhu laka wa bāraka ‘alayka wa jama‘a baynakumā fī khayr.</div>
       <div class="doa-meaning">"May Allah bless you, shower His blessings upon you, and unite both of you in goodness."</div>
-      <button class="btn btn-outline" style="margin-top: 15px;" onclick="speakDoaOnly()">🔊 Recite Doa Again</button>
+      <button class="btn btn-outline" style="margin-top: 15px;" onclick="speakDoa()">🔊 Listen to Doa</button>
     </div>
 
-    <!-- RSVP -->
-    <div class="info-box" id="rsvpSection">
+    <div class="info-box">
       <div class="section-title">RSVP</div>
       <p style="font-size: 12px; margin-bottom: 15px;">Kindly let us know if you can make it.</p>
       
-      <a href="https://wa.me/6593251145?text=Hi%20Latifah,%20I%20am%20confirming%20my%20attendance%20for%20Batrisyia%20%26%20Nabil's%20wedding." target="_blank" class="btn btn-wa">
-        💬 WhatsApp Latifah (Attending)
+      <!-- Attending Buttons -->
+      <a href="https://wa.me/6593251145?text=Hi%20Latifah,%20I%20am%20confirming%20my%20attendance%20for%20Batrisyia%20%26%20Nabil's%20wedding." target="_blank" class="btn btn-wa-attending">
+        💬 Attending (WhatsApp Latifah)
       </a>
       
-      <a href="https://wa.me/6598204281?text=Hi%20Batrisyia,%20I%20am%20confirming%20my%20attendance%20for%20your%20wedding." target="_blank" class="btn btn-wa-secondary">
-        💬 WhatsApp Batrisyia (Attending)
+      <a href="https://wa.me/6598204281?text=Hi%20Batrisyia,%20I%20am%20confirming%20my%20attendance%20for%20your%20wedding." target="_blank" class="btn btn-wa-attending">
+        💬 Attending (WhatsApp Batrisyia)
+      </a>
+
+      <!-- Cannot Attend Button -->
+      <a href="https://wa.me/6593251145?text=Hi%20Latifah,%20I%20am%20sorry%20I%20cannot%20make%20it%20to%20Batrisyia%20%26%20Nabil's%20wedding.%20Wishing%20them%20all%20the%20best!" target="_blank" class="btn btn-wa-decline">
+        ❌ Cannot Attend
       </a>
     </div>
 
-    <!-- Share & Wishes -->
     <div class="info-box">
       <div class="section-title">Share & Wishes</div>
-      <button class="btn btn-outline" onclick="showQr()">📱 Share / Show QR Code</button>
+      <button class="btn btn-outline" onclick="showQr()" style="margin-bottom: 20px;">📱 Share / Show QR Code</button>
       
-      <div style="margin-top: 15px;">
-        <textarea class="wish-input" id="wishText" placeholder="Leave a wish or doa for the couple..."></textarea>
-        <button class="btn btn-primary" onclick="submitWish()">Send Wish</button>
-      </div>
+      <!-- Formspree Form -->
+      <form id="wishForm">
+        <input type="text" id="wishName" name="name" class="input-field" placeholder="Your Name" required />
+        <textarea id="wishText" name="wish" class="input-field" placeholder="Leave a wish or doa for the couple..." required></textarea>
+        <button type="submit" id="submitWishBtn" class="btn btn-primary">Send Wish</button>
+      </form>
     </div>
 
   </div>
@@ -641,9 +563,13 @@
   <div class="modal" id="qrModal" onclick="closeQr(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
       <h3 style="font-family: 'Playfair Display', serif; color: var(--text-accent); margin-bottom: 5px;">Share Invitation</h3>
-      <p style="font-size: 11px; opacity: 0.8;">Scan or save QR code to share</p>
+      <p style="font-size: 11px; opacity: 0.8;">Scan or save to share</p>
       <img id="qrImage" class="qr-img" src="" alt="QR Code" crossorigin="anonymous">
-      <button class="btn btn-primary" id="saveQrBtn" onclick="saveQrCode()">💾 Save QR Code</button>
+      
+      <a id="downloadQrBtn" href="#" target="_blank" class="btn btn-primary" style="margin-bottom: 10px;">
+        💾 Save QR Code
+      </a>
+      
       <button class="btn close-modal" onclick="closeQr(event)">Close</button>
     </div>
   </div>
@@ -664,27 +590,23 @@
     }
 
     const progression = [
-      [293.66, 349.23, 440.00], // D major
-      [220.00, 261.63, 329.63], // A major
-      [174.61, 220.00, 261.63], // F major
-      [196.00, 246.94, 293.66], // G major
+      [293.66, 349.23, 440.00], 
+      [220.00, 261.63, 329.63], 
+      [174.61, 220.00, 261.63], 
+      [196.00, 246.94, 293.66], 
     ];
     let chordIndex = 0;
 
-    function playNote(freq, startTime, duration, vol=0.04) {
+    function playNote(freq, startTime, duration, vol=0.05) {
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
-      
       osc.type = 'sine';
       osc.frequency.value = freq;
-      
       gain.gain.setValueAtTime(0, startTime);
       gain.gain.linearRampToValueAtTime(vol, startTime + 1.5);
       gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-      
       osc.connect(gain);
       gain.connect(audioCtx.destination);
-      
       osc.start(startTime);
       osc.stop(startTime + duration);
     }
@@ -693,12 +615,10 @@
       if (!audioCtx) return;
       const now = audioCtx.currentTime;
       const chord = progression[chordIndex];
-      
-      playNote(chord[0], now, 4.5, 0.06);
-      playNote(chord[1], now + 0.3, 4.5, 0.045);
-      playNote(chord[2], now + 0.6, 4.5, 0.035);
-      playNote(chord[1] * 2, now + 1.5, 3.0, 0.02);
-      
+      playNote(chord[0], now, 4.5, 0.08);
+      playNote(chord[1], now + 0.3, 4.5, 0.06);
+      playNote(chord[2], now + 0.6, 4.5, 0.05);
+      playNote(chord[1] * 2, now + 1.5, 3.0, 0.03);
       chordIndex = (chordIndex + 1) % progression.length;
     }
 
@@ -723,124 +643,90 @@
         main.style.display = 'block';
         setTimeout(() => { main.style.opacity = '1'; }, 50);
         
-        // Start Music, Auto-Flip Card, and Paragraph Auto-Read + Auto-Scroll
         startMusic();
-        startAutoFlip();
-        setTimeout(startGuidedReading, 3500); // Gives 3.5s to admire the card before scrolling & reading
+        // Start Auto Read after a short delay
+        setTimeout(autoReadWithScroll, 2000); 
+        
+        // Start Auto Flip Card
+        setInterval(() => {
+          document.getElementById('card3d').classList.toggle('flipped');
+        }, 6000);
+        
       }, 800);
     }
 
-    // --- 3. Paragraph-by-Paragraph Auto-Read, Auto-Scroll & Doa Recitation ---
-    function getPreferredVoice() {
-      const voices = window.speechSynthesis.getVoices();
-      return voices.find(v => v.lang.includes('en-GB') || v.lang.includes('en-US')) || voices[0];
-    }
-
-    function clearReadingHighlights() {
-      document.querySelectorAll('.info-box').forEach(box => box.classList.remove('reading-active'));
-    }
-
-    function startGuidedReading() {
+    // --- 3. Advanced Text-to-Speech with Auto-Scroll ---
+    function autoReadWithScroll() {
       if (!('speechSynthesis' in window)) return;
+      
       window.speechSynthesis.cancel();
-
-      const steps = [
-        {
-          elementId: 'detailsSection',
-          text: "Together with their families, we cordially invite you to celebrate the wedding day of Batrisyia and Nabil. Your presence will be greatly appreciated.",
-          rate: 0.92
-        },
-        {
-          elementId: 'detailsSection',
-          text: "Join us on Sunday, 27 December 2026, from 11 AM to 3 PM, at Crowne Plaza Changi Airport, Chengal Ballroom Level 1.",
-          rate: 0.92
-        },
-        {
-          elementId: 'doaSection',
-          text: "Doa for the couple. Barakallahu laka, wa baraka alayka, wa jama'a baynakuma fi khayr. May Allah bless you, shower His blessings upon you, and unite both of you in goodness.",
-          rate: 0.85
-        }
+      
+      // Array of paragraphs to read
+      const paragraphs = [
+        { id: 'para1', text: "Together with their families, we cordially invite you to celebrate our wedding day. Your presence will be greatly appreciated." },
+        { id: 'para2', text: "Sunday, 27 December 2026." },
+        { id: 'para3', text: "From 11 AM to 3 PM." },
+        { id: 'para4', text: "Crowne Plaza Changi Airport." },
+        { id: 'para5', text: "Chengal Ballroom Level 1, 75 Airport Boulevard Singapore." }
       ];
 
-      let currentStep = 0;
+      let currentIndex = 0;
 
-      function speakNextStep() {
-        if (currentStep >= steps.length) {
-          clearReadingHighlights();
+      function speakNext() {
+        if (currentIndex >= paragraphs.length) {
+          // Reading finished, now recite the Doa automatically
+          setTimeout(speakDoa, 1000);
           return;
         }
 
-        const step = steps[currentStep];
-        const targetEl = document.getElementById(step.elementId);
-
-        // Highlight & Smooth Auto-Scroll to the active paragraph's section
-        if (targetEl) {
-          clearReadingHighlights();
-          targetEl.classList.add('reading-active');
-          targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const p = paragraphs[currentIndex];
+        const el = document.getElementById(p.id);
+        
+        // Highlight and scroll to the current paragraph
+        if (el) {
+          el.classList.add('reading-active');
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
-        const utterance = new SpeechSynthesisUtterance(step.text);
-        utterance.rate = step.rate;
-        utterance.pitch = 1.0;
-        const voice = getPreferredVoice();
-        if (voice) utterance.voice = voice;
-
+        const utterance = new SpeechSynthesisUtterance(p.text);
+        utterance.rate = 0.9;
+        
+        // When this paragraph finishes, remove highlight, move to next
         utterance.onend = () => {
-          currentStep++;
-          setTimeout(speakNextStep, 600); // Brief pause between paragraphs
-        };
-
-        utterance.onerror = () => {
-          clearReadingHighlights();
+          if (el) el.classList.remove('reading-active');
+          currentIndex++;
+          speakNext();
         };
 
         window.speechSynthesis.speak(utterance);
       }
 
-      speakNextStep();
+      speakNext();
     }
 
-    function speakDoaOnly() {
-      if (!('speechSynthesis' in window)) return;
-      window.speechSynthesis.cancel();
-      clearReadingHighlights();
-
-      const doaBox = document.getElementById('doaSection');
-      doaBox.classList.add('reading-active');
-      doaBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-      const text = "Barakallahu laka, wa baraka alayka, wa jama'a baynakuma fi khayr. May Allah bless you, shower His blessings upon you, and unite both of you in goodness.";
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.85;
-      const voice = getPreferredVoice();
-      if (voice) utterance.voice = voice;
-
-      utterance.onend = () => clearReadingHighlights();
-      window.speechSynthesis.speak(utterance);
+    // --- 4. Doa Recitation (Auto and Manual) ---
+    function speakDoa() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel(); // Stop anything else playing
+        
+        const text = "Barakallahu laka wa baraka alayka wa jama'a baynakuma fi khayr.";
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.8;
+        
+        // We can't easily force an Arabic voice for transliteration, so we use default
+        window.speechSynthesis.speak(utterance);
+        
+        // Scroll to Doa section
+        document.querySelector('.doa-arabic').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
     }
 
-    // --- 4. 3D Card Looping Auto-Flip & Manual Flip ---
-    let flipInterval;
-    const FLIP_DELAY_MS = 5000; // Flips every 5 seconds
-
+    // --- 5. 3D Card Flip (Manual) ---
     function flipCard() {
-      const card = document.getElementById('card3d');
-      card.classList.toggle('flipped');
+      document.getElementById('card3d').classList.toggle('flipped');
     }
 
-    function startAutoFlip() {
-      clearInterval(flipInterval);
-      flipInterval = setInterval(flipCard, FLIP_DELAY_MS);
-    }
-
-    function manualFlipCard() {
-      flipCard();
-      // Reset timer so it doesn't immediately flip back right after a manual tap
-      startAutoFlip();
-    }
-
-    // --- 5. Countdown Timer ---
+    // --- 6. Countdown Timer ---
     const targetDate = new Date("December 27, 2026 11:00:00").getTime();
     
     function updateCountdown() {
@@ -868,92 +754,79 @@
     setInterval(updateCountdown, 31);
     updateCountdown();
 
-    // --- 6. Theme Toggle & Dim Mode ---
+    // --- 7. Theme Toggle (Default is Dark) ---
+    // HTML starts in dark mode by default via CSS :root variables.
+    // The button switches to [data-theme="light"]
     function toggleTheme() {
       const body = document.body;
       const icon = document.getElementById('themeIcon');
       const text = document.getElementById('themeText');
       
-      if (body.getAttribute('data-theme') === 'dark') {
-        body.removeAttribute('data-theme');
+      if (body.getAttribute('data-theme') === 'light') {
+        body.removeAttribute('data-theme'); // Go back to default (Dark)
+        icon.innerText = '☀️';
+        text.innerText = 'Dim Light';
+      } else {
+        body.setAttribute('data-theme', 'light'); // Set to Light Mode
         icon.innerText = '🌙';
         text.innerText = 'Dark Mode';
-      } else {
-        body.setAttribute('data-theme', 'dark');
-        icon.innerText = '☀️';
-        text.innerText = 'Light Mode';
       }
     }
 
-    function toggleDim() {
-      const body = document.body;
-      const dimBtn = document.getElementById('dimBtn');
-      const dimText = document.getElementById('dimText');
-      
-      body.classList.toggle('dimmed');
-      if (body.classList.contains('dimmed')) {
-        dimBtn.classList.add('active-dim');
-        dimText.innerText = 'Dimmed';
-      } else {
-        dimBtn.classList.remove('active-dim');
-        dimText.innerText = 'Dim';
-      }
-    }
-
-    // --- 7. QR Code & Save Function ---
-    let currentQrUrl = '';
-
+    // --- 8. QR Code & Save Function ---
     function showQr() {
       const url = window.location.href;
-      currentQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(url)}`;
-      document.getElementById('qrImage').src = currentQrUrl;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(url)}`;
+      
+      document.getElementById('qrImage').src = qrUrl;
+      
+      // Setup Save button to open image in new tab
+      const saveBtn = document.getElementById('downloadQrBtn');
+      saveBtn.href = qrUrl;
+      
       document.getElementById('qrModal').style.display = 'flex';
     }
 
-    async function saveQrCode() {
-      const btn = document.getElementById('saveQrBtn');
-      const originalText = btn.innerText;
-      btn.innerText = '⏳ Saving...';
-
-      try {
-        const response = await fetch(currentQrUrl);
-        const blob = await response.blob();
-        const blobUrl = URL.createObjectURL(blob);
-        
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.download = 'Batrisyia-Nabil-Wedding-QR.png';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(blobUrl);
-        
-        btn.innerText = '✅ Saved!';
-        setTimeout(() => { btn.innerText = originalText; }, 2000);
-      } catch (err) {
-        // Fallback: open image in new tab if browser blocks cross-origin blob download
-        window.open(currentQrUrl, '_blank');
-        btn.innerText = originalText;
-      }
-    }
-
     function closeQr(e) {
-      if (e && e.target.id !== 'qrModal' && !e.target.classList.contains('close-modal')) return;
+      if (e && e.target.id !== 'qrModal' && e.target.tagName !== 'BUTTON') return;
       document.getElementById('qrModal').style.display = 'none';
     }
 
-    // --- 8. Wishes Form ---
-    function submitWish() {
-      const text = document.getElementById('wishText').value.trim();
-      if (!text) {
-        alert("Please write a wish first!");
-        return;
-      }
-      document.getElementById('wishText').value = '';
-      alert("Thank you! Your wish has been sent to the couple.");
-    }
+    // --- 9. Formspree Wishes Form ---
+    const form = document.getElementById('wishForm');
+    const submitBtn = document.getElementById('submitWishBtn');
 
-    // --- 9. Flying Leaves Animation ---
+    form.addEventListener('submit', function(e) {
+      e.preventDefault(); 
+      
+      // Your Formspree Endpoint
+      const endpoint = "https://formspree.io/f/mnpdoaag"; 
+
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Sending...";
+
+      const formData = new FormData(form);
+
+      fetch(endpoint, {
+        method: 'POST',
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+      }).then(response => {
+        if (response.ok) {
+          alert("Thank you! Your wish has been sent to the couple.");
+          form.reset();
+        } else {
+          alert("Oops! There was a problem sending your wish. Please try again.");
+        }
+      }).catch(error => {
+        alert("Network error. Please check your connection and try again.");
+      }).finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Send Wish";
+      });
+    });
+
+    // --- 10. Flying Leaves Animation ---
     const canvas = document.getElementById('leafCanvas');
     const ctx = canvas.getContext('2d');
     let width, height;
@@ -1021,10 +894,6 @@
     }
     animateLeaves();
 
-    // Ensure voices are loaded on mobile browsers
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.onvoiceschanged = () => { getPreferredVoice(); };
-    }
   </script>
 </body>
 </html>
