@@ -664,7 +664,6 @@
       
       window.speechSynthesis.cancel();
       
-      // Updated text to separate English and Malay for better pronunciation
       const steps = [
         { 
           id: 'para-a1', 
@@ -673,19 +672,18 @@
         {
           id: 'para-a1',
           text: "Salam Sejahtera. Dengan segala hormatnya mengundang anda ke majlis perkahwinan puteri kami. Kehadiran anda amat dihargai.",
-          lang: 'ms' // Force Malay pronunciation for this part
+          lang: 'ms' 
         },
-        { id: 'para-date', text: "Sunday, 27 December 2026." },
-        { id: 'para-time', text: "From 11 AM to 3 PM." },
-        { id: 'para-venue', text: "Crowne Plaza Changi Airport." },
-        { id: 'para-address', text: "Chengal Ballroom Level 1, 75 Airport Boulevard Singapore." }
+        { id: 'para-date', text: "Ahad, 27 Disember 2026.", lang: 'ms' }, // Changed to Malay!
+        { id: 'para-time', text: "From 11 AM to 3 PM.", lang: 'en' },
+        { id: 'para-venue', text: "Crowne Plaza Changi Airport.", lang: 'en' },
+        { id: 'para-address', text: "Chengal Ballroom Level 1, 75 Airport Boulevard Singapore.", lang: 'en' }
       ];
 
       let currentIndex = 0;
 
       function speakNext() {
         if (currentIndex >= steps.length) {
-          // Reading finished, now play the MP3
           playDoaAudio();
           return;
         }
@@ -693,7 +691,6 @@
         const step = steps[currentIndex];
         const el = document.getElementById(step.id);
         
-        // Keep highlight on if it's the same ID consecutively
         if (el && !el.classList.contains('reading-active')) {
           el.classList.add('reading-active');
           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -702,7 +699,6 @@
         const utterance = new SpeechSynthesisUtterance(step.text);
         utterance.rate = 0.9;
         
-        // If step has a specific language, use it to prevent weird accents
         if (step.lang) {
            utterance.lang = step.lang === 'ms' ? 'ms-MY' : 'en-US';
            const voices = window.speechSynthesis.getVoices();
@@ -712,15 +708,12 @@
 
         utterance.onend = () => {
           currentIndex++;
-          // Only remove highlight if the NEXT step is a different element
           if (currentIndex < steps.length && steps[currentIndex].id !== step.id) {
              if (el) el.classList.remove('reading-active');
           }
-          // If it's the last step, clean up
           if (currentIndex >= steps.length && el) {
              el.classList.remove('reading-active');
           }
-          
           speakNext();
         };
 
@@ -732,7 +725,6 @@
 
     // --- 4. Play Doa MP3 ---
     function playDoaAudio() {
-      // Stop background music so the Doa is clear
       if (isPlaying) {
         clearInterval(melodyInterval);
         isPlaying = false;
@@ -740,7 +732,6 @@
       
       const audio = document.getElementById('doaAudio');
       
-      // Scroll to Doa Section
       document.getElementById('doa-section').scrollIntoView({ behavior: 'smooth', block: 'center' });
       document.getElementById('doa-section').classList.add('reading-active');
       
