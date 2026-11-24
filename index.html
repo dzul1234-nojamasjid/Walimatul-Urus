@@ -555,7 +555,26 @@
       </a>
     </div>
 
+        <!-- Visitor Stats Box -->
     <div class="info-box">
+      <div class="section-title">Visitor Stats</div>
+      <div style="display: flex; justify-content: center; align-items: center; gap: 30px; margin-bottom: 20px; font-size: 14px;">
+        
+        <!-- Visitor Counter -->
+        <div style="text-align: center;">
+          <div style="font-size: 24px; font-weight: bold; color: var(--text-accent);" id="supabaseViews">...</div>
+          <div style="font-size: 11px; opacity: 0.8;">Total Views</div>
+        </div>
+
+        <!-- Country Flag -->
+        <div style="text-align: center;">
+          <img id="countryFlagImg" src="https://flagcdn.com/w40/un.png" alt="Flag" style="height: 24px; border-radius: 3px; margin-bottom: 2px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+          <div style="font-size: 11px; opacity: 0.8;" id="countryName">Detecting...</div>
+        </div>
+
+      </div>
+    </div>
+    <!-- End Visitor Stats Box -->
       <div class="section-title">Share & Wishes</div>
       <button class="btn btn-outline" onclick="showQr()" style="margin-bottom: 20px;">📱 Share / Show QR Code</button>
       
@@ -948,7 +967,68 @@
       requestAnimationFrame(animateLeaves);
     }
     animateLeaves();
+    // --- 11. Live Visitor Counter & Country Flags (Supabase Version) ---
+    async function trackVisitor() {
+      // 1. Country Flag Detection
+      try {
+        const geoRes = await fetch('https://ipapi.co/json/');
+        const geoData = await geoRes.json();
+        const countryCode = geoData.country_code.toLowerCase();
+        document.getElementById('countryFlagImg').src = `https://flagcdn.com/w40/${countryCode}.png`;
+        document.getElementById('countryName').innerText = geoData.country_name;
+      } catch (e) {
+        document.getElementById('countryFlagImg').src = `https://flagcdn.com/w40/un.png`;
+        document.getElementById('countryName').innerText = "Unknown";
+      }
 
+      // 2. Supabase View Counter
+      const hasVisited = document.cookie.includes('visited_batrisyia=yes');
+      
+      try {
+        if (!hasVisited) {
+          // Get current count
+          const { data, error } = await supabaseClient
+            .from('views')
+            .select('count')
+            .eq('id', 1)
+            .single();
+
+          if (data && !error) {
+            const newCount = data.count + 1;
+            
+            // Update the count
+            await supabaseClient
+              .from('views')
+              .update({ count: newCount })
+              .eq('id', 1);
+              
+            document.getElementById('supabaseViews').innerText = newCount;
+            
+            // Set cookie so we don't count them again for 1 day
+            document.cookie = "visited_batrisyia=yes; max-age=86400; path=/";
+          }
+        } else {
+          // If they already have the cookie, just fetch the number
+          const { data, error } = await supabaseClient
+            .from('views')
+            .select('count')
+            .eq('id', 1)
+            .single();
+            
+          if (data && !error) {
+            document.getElementById('supabaseViews').innerText = data.count;
+          } else {
+             document.getElementById('supabaseViews').innerText = "1+";
+          }
+        }
+      } catch (e) {
+        console.error("Supabase Counter Error:", e);
+        document.getElementById('supabaseViews').innerText = "1+";
+      }
+    }
+
+    // Call the function when the page loads
+    trackVisitor();
   </script>
 </body>
 </html>
