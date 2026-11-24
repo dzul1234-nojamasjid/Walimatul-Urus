@@ -10,9 +10,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
 
-  <!-- Supabase Library -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <style>
     /* Default is Dark Mode */
     :root {
@@ -463,7 +460,7 @@
       border-radius: 8px;
       transition: background-color 0.3s;
       padding: 5px;
-      margin: -5px; /* counteract padding */
+      margin: -5px;
     }
   </style>
 </head>
@@ -532,7 +529,6 @@
       <div class="doa-transliteration">Bārakallāhu laka wa bāraka ‘alayka wa jama‘a baynakumā fī khayr.</div>
       <div class="doa-meaning">"May Allah bless you, shower His blessings upon you, and unite both of you in goodness."</div>
       
-      <!-- Audio Tag for Ustaz Abdul Somad MP3 -->
       <audio id="doaAudio" src="https://raw.githubusercontent.com/dzul1234-nojamasjid/Walimatul-Urus/main/doa%20pengantin.mp3" preload="auto"></audio>
       
       <button class="btn btn-outline" style="margin-top: 15px;" onclick="playDoaAudio()">🔊 Listen to Doa</button>
@@ -555,7 +551,7 @@
       </a>
     </div>
 
-        <!-- Visitor Stats Box -->
+    <!-- Visitor Stats Box -->
     <div class="info-box">
       <div class="section-title">Visitor Stats</div>
       <div style="display: flex; justify-content: center; align-items: center; gap: 30px; margin-bottom: 20px; font-size: 14px;">
@@ -574,15 +570,16 @@
 
       </div>
     </div>
-    <!-- End Visitor Stats Box -->
+
+    <!-- Share & Wishes Box -->
+    <div class="info-box">
       <div class="section-title">Share & Wishes</div>
       <button class="btn btn-outline" onclick="showQr()" style="margin-bottom: 20px;">📱 Share / Show QR Code</button>
       
-      <!-- Supabase Live Wishes Wall -->
+      <!-- Live Wishes Wall -->
       <div style="margin-top: 20px; border-top: 1px dashed var(--border-col); padding-top: 15px;">
         <div class="section-title" style="border: none; margin-bottom: 10px; font-size: 14px;">Recent Wishes</div>
         <div id="wishesWall" style="height: 120px; overflow-y: auto; position: relative; font-size: 12px; line-height: 1.6; text-align: left; padding-right: 5px;">
-          <!-- Wishes will appear here -->
           <div style="text-align: center; opacity: 0.5;">Loading wishes...</div>
         </div>
       </div>
@@ -615,6 +612,9 @@
   <audio id="bgMusic" src="https://raw.githubusercontent.com/dzul1234-nojamasjid/Walimatul-Urus/main/piano.mp3" loop preload="auto"></audio>
 
   <script>
+    // --- 0. Cloudflare Worker Endpoint (No Supabase credentials here!) ---
+    const WORKER_URL = 'https://batrisyia-nabil.dzul1234.workers.dev';
+
     // --- 1. Audio Elements ---
     const bgMusic = document.getElementById('bgMusic');
     const doaAudio = document.getElementById('doaAudio');
@@ -632,14 +632,11 @@
         main.style.display = 'block';
         setTimeout(() => { main.style.opacity = '1'; }, 50);
         
-        // Play Piano Music
-        bgMusic.volume = 0.5; // Set volume to 50%
+        bgMusic.volume = 0.5;
         bgMusic.play().catch(e => console.log("Audio play blocked. Interaction needed."));
         
-        // Start Auto Read
         setTimeout(autoReadWithScroll, 2000); 
         
-        // Auto Flip Card
         setInterval(() => {
           document.getElementById('card3d').classList.toggle('flipped');
         }, 6000);
@@ -688,19 +685,19 @@
         utterance.rate = 0.9;
         
         if (step.lang) {
-           utterance.lang = step.lang === 'ms' ? 'ms-MY' : 'en-US';
-           const voices = window.speechSynthesis.getVoices();
-           const matchedVoice = voices.find(v => v.lang.includes(step.lang));
-           if (matchedVoice) utterance.voice = matchedVoice;
+          utterance.lang = step.lang === 'ms' ? 'ms-MY' : 'en-US';
+          const voices = window.speechSynthesis.getVoices();
+          const matchedVoice = voices.find(v => v.lang.includes(step.lang));
+          if (matchedVoice) utterance.voice = matchedVoice;
         }
 
         utterance.onend = () => {
           currentIndex++;
           if (currentIndex < steps.length && steps[currentIndex].id !== step.id) {
-             if (el) el.classList.remove('reading-active');
+            if (el) el.classList.remove('reading-active');
           }
           if (currentIndex >= steps.length && el) {
-             el.classList.remove('reading-active');
+            el.classList.remove('reading-active');
           }
           speakNext();
         };
@@ -711,9 +708,8 @@
       speakNext();
     }
 
-    // --- 4. Play Doa MP3 (Fade out piano, play doa, fade back in) ---
+    // --- 4. Play Doa MP3 ---
     function playDoaAudio() {
-      // Fade out background piano
       let fadeOut = setInterval(() => {
         if (bgMusic.volume > 0.05) {
           bgMusic.volume -= 0.05;
@@ -730,11 +726,10 @@
       
       setTimeout(() => {
         audio.play().catch(e => console.log("Doa audio play blocked."));
-      }, 500); // Wait for piano to fade slightly
+      }, 500);
       
       audio.onended = () => {
         document.getElementById('doa-section').classList.remove('reading-active');
-        // Fade piano back in
         bgMusic.volume = 0;
         bgMusic.play();
         let fadeIn = setInterval(() => {
@@ -816,59 +811,47 @@
       document.getElementById('qrModal').style.display = 'none';
     }
 
-    // --- 9. Supabase Live Wishes ---
-    const SUPABASE_URL = 'https://nlkjbblgtscazpvixfzz.supabase.co'; // Replace this
-    const SUPABASE_ANON_KEY = 'sb_publishable_wO4lYkspm-68OVSNBlKSjw_8QP2UN-D'; // Replace this
+    // Helper to escape HTML safely when rendering wishes
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
 
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+    // --- 9. Live Wishes (via Cloudflare Worker) ---
     const form = document.getElementById('wishForm');
     const submitBtn = document.getElementById('submitWishBtn');
     const wishesWall = document.getElementById('wishesWall');
 
-    // Function to fetch and display wishes
     async function fetchWishes() {
-      const { data, error } = await supabaseClient
-        .from('wishes')
-        .select('name, message')
-        .order('created_at', { ascending: false })
-        .limit(10); // Get the latest 10
+      try {
+        const res = await fetch(`${WORKER_URL}/api/wishes`);
+        if (!res.ok) throw new Error('Network response was not ok');
+        const data = await res.json();
 
-      if (error) {
+        if (!Array.isArray(data) || data.length === 0) {
+          wishesWall.innerHTML = '<div style="text-align: center; opacity: 0.5;">No wishes yet. Be the first!</div>';
+          return;
+        }
+
+        wishesWall.innerHTML = data.map(w => `
+          <div style="margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+            <strong style="color: var(--text-accent);">${escapeHtml(w.name)}:</strong> ${escapeHtml(w.message)}
+          </div>
+        `).join('');
+
+        wishesWall.scrollTop = wishesWall.scrollHeight;
+      } catch (error) {
         console.error('Error fetching wishes:', error);
         wishesWall.innerHTML = '<div style="text-align: center; color: red;">Failed to load wishes.</div>';
-        return;
       }
-
-      if (data.length === 0) {
-        wishesWall.innerHTML = '<div style="text-align: center; opacity: 0.5;">No wishes yet. Be the first!</div>';
-        return;
-      }
-
-      // Build the HTML
-      wishesWall.innerHTML = data.map(w => `
-        <div style="margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
-          <strong style="color: var(--text-accent);">${w.name}:</strong> ${w.message}
-        </div>
-      `).join('');
-
-      // Simple auto-scroll effect to show the newest at the bottom
-      wishesWall.scrollTop = wishesWall.scrollHeight;
     }
 
-    // Initial load
     fetchWishes();
+    setInterval(fetchWishes, 8000);
 
-    // Real-time subscription: listen for new wishes
-    supabaseClient
-      .channel('public:wishes')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'wishes' }, payload => {
-        // When a new wish is added, fetch the updated list
-        fetchWishes();
-      })
-      .subscribe();
-
-    // Handle form submission
     form.addEventListener('submit', async function(e) {
       e.preventDefault();
 
@@ -883,21 +866,25 @@
       submitBtn.disabled = true;
       submitBtn.innerText = "Sending...";
 
-      const { error } = await supabaseClient
-        .from('wishes')
-        .insert([{ name: name, message: message }]);
+      try {
+        const res = await fetch(`${WORKER_URL}/api/wishes`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, message })
+        });
 
-      if (error) {
-        alert("Oops! There was a problem sending your wish. Please try again.");
-        console.error(error);
-      } else {
+        if (!res.ok) throw new Error('Failed to post wish');
+
         alert("Thank you! Your wish has been added.");
         form.reset();
-        // The real-time listener will automatically update the wall
+        await fetchWishes();
+      } catch (error) {
+        alert("Oops! There was a problem sending your wish. Please try again.");
+        console.error(error);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Send Wish";
       }
-
-      submitBtn.disabled = false;
-      submitBtn.innerText = "Send Wish";
     });
 
     // --- 10. Flying Leaves Animation ---
@@ -967,67 +954,42 @@
       requestAnimationFrame(animateLeaves);
     }
     animateLeaves();
-    // --- 11. Live Visitor Counter & Country Flags (Supabase Version) ---
+
+    // --- 11. Live Visitor Counter & Country Flags (via Cloudflare Worker) ---
     async function trackVisitor() {
-      // 1. Country Flag Detection
       try {
         const geoRes = await fetch('https://ipapi.co/json/');
         const geoData = await geoRes.json();
-        const countryCode = geoData.country_code.toLowerCase();
+        const countryCode = (geoData.country_code || 'un').toLowerCase();
         document.getElementById('countryFlagImg').src = `https://flagcdn.com/w40/${countryCode}.png`;
-        document.getElementById('countryName').innerText = geoData.country_name;
+        document.getElementById('countryName').innerText = geoData.country_name || 'Unknown';
       } catch (e) {
         document.getElementById('countryFlagImg').src = `https://flagcdn.com/w40/un.png`;
         document.getElementById('countryName').innerText = "Unknown";
       }
 
-      // 2. Supabase View Counter
       const hasVisited = document.cookie.includes('visited_batrisyia=yes');
-      
-      try {
-        if (!hasVisited) {
-          // Get current count
-          const { data, error } = await supabaseClient
-            .from('views')
-            .select('count')
-            .eq('id', 1)
-            .single();
+      const method = hasVisited ? 'GET' : 'POST';
 
-          if (data && !error) {
-            const newCount = data.count + 1;
-            
-            // Update the count
-            await supabaseClient
-              .from('views')
-              .update({ count: newCount })
-              .eq('id', 1);
-              
-            document.getElementById('supabaseViews').innerText = newCount;
-            
-            // Set cookie so we don't count them again for 1 day
+      try {
+        const res = await fetch(`${WORKER_URL}/api/views`, { method });
+        if (!res.ok) throw new Error('Views response not ok');
+        const data = await res.json();
+
+        if (typeof data.count === 'number') {
+          document.getElementById('supabaseViews').innerText = data.count;
+          if (!hasVisited) {
             document.cookie = "visited_batrisyia=yes; max-age=86400; path=/";
           }
         } else {
-          // If they already have the cookie, just fetch the number
-          const { data, error } = await supabaseClient
-            .from('views')
-            .select('count')
-            .eq('id', 1)
-            .single();
-            
-          if (data && !error) {
-            document.getElementById('supabaseViews').innerText = data.count;
-          } else {
-             document.getElementById('supabaseViews').innerText = "1+";
-          }
+          document.getElementById('supabaseViews').innerText = "1+";
         }
       } catch (e) {
-        console.error("Supabase Counter Error:", e);
+        console.error("Worker Counter Error:", e);
         document.getElementById('supabaseViews').innerText = "1+";
       }
     }
 
-    // Call the function when the page loads
     trackVisitor();
   </script>
 </body>
